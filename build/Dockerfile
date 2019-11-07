@@ -23,14 +23,17 @@ RUN mkdir /var/run/uwsgi
 # Install python3 and pip
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && apt-get install -y --no-install-recommends \
-       git \ 
-       python3 \ 
-       python3-setuptools \ 
-       python3-pip \ 
-       python3-dev \ 
-       build-essential \ 
-       libpcre3 \ 
-       libpcre3-dev \ 
+       git \
+       python3 \
+       python3-setuptools \
+       python3-pip \
+       python3-dev \
+       python3-wheel \
+       python3-django-uwsgi \
+       python3-psycopg2 \
+       build-essential \
+       libpcre3 \
+       libpcre3-dev \
     && rm -rf /tmp/* /var/tmp/* \
     && rm -rf /var/lib/apt/lists/*
 
@@ -55,15 +58,15 @@ RUN git clone https://github.com/nsupdate-info/nsupdate.info.git nsupdate
 ADD build/django/create-superuser.py /nsupdate/nsupdate/management/commands/create-superuser.py
 
 # Install easy-install wrapper scripts
-COPY ./build/bin/pip /bin/pip
+#COPY ./build/bin/pip /bin/pip
 
 WORKDIR /nsupdate
 
-RUN pip install wheel
+#RUN pip install wheel # Installed via apt
 RUN python3 setup.py bdist_wheel
-RUN pip install psycopg2 uwsgi
-RUN pip install -r requirements.d/$BUILD.txt
-RUN pip install -e .
+#RUN pip install psycopg2 uwsgi # Installed via apt
+RUN python3 -m pip install -r requirements.d/$BUILD.txt
+RUN python3 -m pip install -e .
 
 # Add uwsgi ini file
 ADD build/uwsgi.ini uwsgi.ini
